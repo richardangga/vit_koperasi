@@ -1,0 +1,683 @@
+<odoo>
+  <data>
+    <record id='ksp_kredit_form_view' model='ir.ui.view'>
+        <field name="name">ksp.kredit.form.view</field>
+        <field name="model">ksp.kredit</field>
+        <field name="arch" type="xml">
+            <form string="Administrasi Kredit">
+              <header>
+                  <button string="generate angsuran" type="object" name="generate_angsuran" class="oe_highlight" states="draft"/>
+                  <button string="confirm" type="object" name="confirm_kredit" class="oe_highlight" states="draft"/>
+                  <button string="validasi" type="object" name="validasi_kredit" class="oe_highlight" states="confirm"/>
+                  <button string="pencairan" type="object" name="pencairan_kredit" class="oe_highlight" states="validate"/>
+                  <button string="pelunasan" type="object" name="pelunasan_kredit" class="oe_highlight" states="cair"/>
+                  <button string="bermasalah" type="object" name="kredit_macet" class="oe_highlight" states="cair" />
+                  <button string="cancel" type="object" name="button_cancel" class="oe_highlight" states="draft" />
+                  <field name="state" widget="statusbar"/>
+              </header>
+              <sheet>
+                    <group>
+                        <group states="draft">
+                            <field name="name" string="No. PK"/>
+                            <field name="kredit_type" />
+                            <field name="tanggal" />
+                            <field name="tgl_cair" />
+                            <field name="partner_id" string="Nasabah" />
+                            <field name="pokok" />
+                            <field name="rate" />
+                            <field name="rate_type" />
+                            <field name="tempo" />
+                            <field name="tempo_type" />
+                        </group>
+                        <group>
+                            <group>
+                                <field name="angsuran" readonly="1"/>
+                                <field name="bulat" />
+                                <field name="bunga" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="total_angsuran" readonly="1"/>
+                                <field name="total_pokok" readonly="1"/>
+                                <field name="total_bunga" readonly="1"/>
+                                <field name="sisa_angsuran" readonly="1"/>
+                                <field name="sisa_pokok" readonly="1"/>
+                                <field name="sisa_bunga" readonly="1"/>
+                            </group>
+                        </group>
+                    </group>
+                <notebook>
+                    <page string="Jaminan">
+                        <field name="jaminan_line">
+                            <tree string="Jaminan yang dipergunakan">
+                                <field name="jaminan_id"/>
+                                <field name="nilai"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Jadwal Angsuran">
+                    <field name="kredit_line">
+                        <tree String="Jadwal Angsuran" states="draft">
+                            <field name="name" string="No. Angsuran"/>
+                            <field name="sequence"/>
+                            <field name="angsuran"/>
+                            <field name="pokok"/>
+                            <field name="bunga"/>
+                            <field name="denda"/>
+                            <field name="tgl_jt"/>
+                            <field name="tgl_bayar"/>
+                            <field name="lunas"/>
+                        </tree>
+                    </field>
+                    </page>
+                    <page string="Validasi">
+                        <group>
+                            <group>
+                                <field name="apply_1" readonly="1"/>
+                            </group>
+                            <group>
+                                <button string="generate" name="generate_apply" type='object' class="oe_highlight"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="apply_to" readonly="1"/>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="apply_2"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="apply_key" readonly="1"/>
+                        </group>
+                    </page>
+                    <page string="Pencairan">
+                        <group>
+                            <field name="account_cair"
+                                domain="[('user_type_id.type','=','liquidity')]"/>
+                        </group>
+                        <field name="biaya_line">
+                            <tree String = 'Biaya Pencairan'>
+                                <field name="account_id"/>
+                                <field name="nominal"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Jurnal">
+                        <field name="move_line">
+                            <tree>
+                                <field name="date"/>
+                                <field name="name"/>
+                                <field name="ref"/>
+                                <field name="amount"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+              </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id='ksp_kredit_tree_view' model='ir.ui.view'>
+        <field name="name">ksp.kredit.tree.view</field>
+        <field name="model">ksp.kredit</field>
+        <field name="arch" type="xml">
+            <tree string="Administrasi Kredit">
+                <field name="name"/>
+                <field name="partner_id" string="Nasabah"/>
+                <field name="pokok"/>
+                <field name="rate"/>
+                <field name="rate_type"/>
+                <field name="bunga"/>
+                <field name="angsuran"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ksp_kredit_line_form_view" model="ir.ui.view">
+        <field name="name">ksp.kredit.line.form.view</field>
+        <field name="model">ksp.kredit.line</field>
+        <field name="arch" type="xml">
+            <form string="Angsuran">
+                <group>
+                    <group>
+                        <field name="name" readonly="1"/>
+                        <field name="tgl_jt" readonly="0"/>
+                        <field name="tgl_bayar" readonly="1"/>
+                        <field name="angsuran" readonly="1"/>
+                        <field name="pokok" readonly="1"/>
+                        <field name="bunga" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="denda" readonly="1"/>
+                        <field name="sisa_pokok" readonly="1"/>
+                        <field name="sisa_bunga" readonly="1"/>
+                        <field name="sisa_angsuran" readonly="1"/>
+                        <field name="pembayaran" readonly="1"/>
+                        <field name="lunas" readonly="1"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Pembayaran">
+                        <field name="bayar_line">
+                            <tree>
+                                <field name="tgl_bayar"/>
+                                <field name="nominal"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </form>
+        </field>
+    </record>
+    <record id="ksp_kredit_biaya_form_view" model="ir.ui.view">
+        <field name="name">ksp.kredit.biaya.form.view</field>
+        <field name="model">ksp.kredit.biaya.line</field>
+        <field name="arch" type="xml">
+            <form string="Biaya Pencairan">
+                <group>
+                    <field name="account_id"/>
+                    <field name="nominal"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="ksp_kredit_action_window" model="ir.actions.act_window">
+        <field name="name">Administrasi Kredit</field>
+        <field name="res_model">ksp.kredit</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Koperasi"
+              id = "ksp_menu"/>
+
+    <menuitem name="Kredit"
+              id = "ksp_kredit_menu"
+              sequence="10"
+              parent = "ksp_menu"/>
+
+    <menuitem name="Administrasi Kredit"
+              id = "ksp_admin_kredit_menu"
+              parent = "ksp_kredit_menu"
+              action = "ksp_kredit_action_window"
+    />
+
+    <record id="ksp_kredit_type_form_view" model="ir.ui.view">
+        <field name="name">ksp.kredit.type.form.view</field>
+        <field name="model">ksp.kredit.type</field>
+        <field name="arch" type="xml">
+            <form string="Jenis Kredit">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="seq_id"/>
+                        <field name="journal_cair"/>
+                        <field name="journal_angsur"/>
+                        <field name="account_pokok"/>
+                        <field name="account_bunga"/>
+                        <field name="account_denda"/>
+                        <field name="denda"/>
+                    </group>
+                    <notebook>
+                        <page string="Biaya">
+                            <field name="kredit_line">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="account_id"/>
+                                    <field name="rate" label="Rate"/>
+                                    <field name="nominal"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ksp_kredit_type_tree_view" model="ir.ui.view">
+        <field name="name">ksp.kredit.type.tree.view</field>
+        <field name="model">ksp.kredit.type</field>
+        <field name="arch" type="xml">
+            <tree string="Jenis Kredit">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ksp_kredit_type_action_window" model="ir.actions.act_window">
+        <field name="name">Jenis Kredit</field>
+        <field name="res_model">ksp.kredit.type</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="ksp_kredit_type_line_form_view" model="ir.ui.view">
+        <field name="name">ksp.kredit.type.line.form.view</field>
+        <field name="model">ksp.kredit.type.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="account_id"/>
+                        <field name="rate"/>
+                        <field name="nominal"/>
+                        <p>
+                            Rumus biaya = (rate/100 * pokok pinjaman) + nominal
+                        </p>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <menuitem name="Configuration"
+              id = "ksp_config_menu"
+              sequence="90"
+              parent = "ksp_menu"/>
+
+    <menuitem name="Kredit"
+              id = "ksp_config_kredit_menu"
+              parent = "ksp_config_menu"/>
+
+    <menuitem name="Jenis"
+              id = "ksp_kredit_type_menu"
+              parent = "ksp_config_kredit_menu"
+              action="ksp_kredit_type_action_window"/>
+
+    <record id="ksp_kredit_bayar_form_view" model="ir.ui.view">
+        <field name="name">ksp.kredit.bayar.form.view</field>
+        <field name="model">ksp.kredit.bayar</field>
+        <field name="arch" type="xml">
+            <form string ="Pembayaran Angsuran">
+                <header>
+                    <button name="confirm_bayar"
+                            type="object"
+                            string="Confirm"
+                            class="oe_highlight"
+                            attrs="{'invisible':[('state','!=','draft')]}"/>
+                    <button name="post_bayar"
+                            type="object"
+                            string="Post"
+                            class="oe_highlight"
+                            attrs="{'invisible':[('state','!=','confirm')]}"/>
+                    <button name="cancel_bayar"
+                            type="object"
+                            string="Cancel"
+                            class="oe_highlight"
+                            attrs="{'invisible':[('state','=','draft')]}"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <group>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="kredit_id"/>
+                    <field name="account_id"/>
+                    <field name="amount"/>
+                    <field name="total_paid"/>
+                </group>
+                <field name="bayar_line">
+                    <tree string="angsuran" editable="bottom">
+                        <field name="kredit_line_id"
+                               domain = "[('kredit_id','=',parent.kredit_id)]" string="No.Angsuran"/>
+                        <field name="tgl_bayar" readonly="1"/>
+                        <field name="nominal"/>
+                    </tree>
+                </field>
+            </form>
+        </field>
+    </record>
+
+    <record id="ksp_kredit_bayar_tree_view" model="ir.ui.view">
+        <field name="name">ksp.kredit.bayar.tree.view</field>
+        <field name="model">ksp.kredit.bayar</field>
+        <field name="arch" type="xml">
+            <tree string="Pembayaran Angsuran">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="kredit_id"/>
+                <field name="account_id"/>
+                <field name="amount"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ksp_kredit_line_bayar_form_view" model="ir.ui.view">
+        <field name="name">ksp.kredit.line.bayar.form.view</field>
+        <field name="model">ksp.kredit.line.bayar</field>
+        <field name="arch" type="xml">
+            <form string="Rincian Pembayaran">
+                <group>
+                    <field name="name" readonly="1"/>
+                    <field name="kredit_id" />
+                    <field name="kredit_line_id"
+                           domain="[('kredit_id.id','=',3)]"
+                           label="No.Angsuran"/>
+                    <field name="nominal"/>
+                    <field name="user_id"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="ksp_kredit_bayar_action_window" model="ir.actions.act_window">
+        <field name="name">Pembayaran Angsuran</field>
+        <field name="res_model">ksp.kredit.bayar</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Pembayaran Angsuran"
+              id = "ksp_kredit_bayar_menu"
+              parent = "ksp_kredit_menu"
+              action = "ksp_kredit_bayar_action_window"/>
+
+    <record id="account_move_form_view_inherit" model="ir.ui.view">
+        <field name="name">account.move.form.view.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="kredit_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="res_partner_form_view_inherit" model="ir.ui.view">
+        <field name="name">res.partner.form.view.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='sales_purchases']" position="after">
+                <page name="koperasi" string="Koperasi">
+                    <group>
+                        <field name="kredit"/>
+                        <field name="deposito"/>
+                        <field name="tabungan"/>
+                    </group>
+                    <group>
+                        <field name="no_id"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_res_partner_filter_inherit" model="ir.ui.view">
+        <field name="name">res.partner.select.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='supplier']" position="after">
+                <filter string="Nasabah Kredit" name="kredit" domain="[('kredit','=',1), ('parent_id', '=', False)]"/>
+                <filter string="Nasabah Tabungan" name="tabungan" domain="[('tabungan','=',1), ('parent_id', '=', False)]"/>
+                <filter string="Nasabah Deposito" name="deposito" domain="[('deposito','=',1), ('parent_id', '=', False)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="ksp_nasabah_kredit_action_window" model="ir.actions.act_window">
+        <field name="name">Nasabah Kredit</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_kredit':1}</field>
+        <field name="filter" eval="True"/>
+    </record>
+
+    <menuitem name="Nasabah Kredit"
+              id = 'ksp_nasabah_kredit_menu'
+              parent = 'ksp_kredit_menu'
+              action = 'ksp_nasabah_kredit_action_window'/>
+
+    <record id="ksp_jaminan_form_view" model="ir.ui.view">
+        <field name="name">Administrasi Jaminan</field>
+        <field name="model">ksp.jaminan</field>
+        <field name="arch" type="xml">
+            <form string="Administrasi Jaminan">
+                <sheet>
+                    <field name="image"
+                           widget="image"
+                           class="oe_avatar"
+                           option="{'preview':'image_medium','size':'[90,90]}" />
+                    <field name="image2"
+                           widget="image"
+                           class="oe_avatar"
+                           option="{'preview':'image_medium','size':'[90,90]}" />
+                    <field name="image3"
+                           widget="image"
+                           class="oe_avatar"
+                           option="{'preview':'image_medium','size':'[90,90]}" />
+                    <field name="image4"
+                           widget="image"
+                           class="oe_avatar"
+                           option="{'preview':'image_medium','size':'[90,90]}" />
+                    <group>
+                        <field name="name"/>
+                        <field name="description"/>
+                        <field name="model"/>
+                        <field name="harga_pasar"/>
+                        <field name="harga_taksiran"/>
+                    </group>
+                    <notebook>
+                        <page string="Mobil/Motor">
+                            <group>
+                                <group>
+                                    <field name="type"/>
+                                    <field name="no_mesin"/>
+                                    <field name="no_rangka"/>
+                                    <field name="no_polisi"/>
+                                    <field name="no_bpkb"/>
+                                </group>
+                                <group>
+                                    <field name="tahun"/>
+                                    <field name="warna"/>
+                                    <field name="nama_stnk"/>
+                                    <field name="alamat_stnk"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Sertifikat">
+                            <group>
+                                <field name="no_sertifikat"/>
+                                <field name="bentuk_sertifikat"/>
+                                <field name="alamat_sertifikat"/>
+                                <field name="luas_sertifikat"/>
+                                <field name="no_surat_ukur"/>
+                                <field name="tgl_surat_ukur"/>
+                            </group>
+                        </page>
+                        <page string="Informasi Tambahan">
+                            <group>
+                                <field name="keterangan"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ksp_jaminan_tree_view" model="ir.ui.view">
+        <field name="name">ksp.jaminan.tree.view</field>
+        <field name="model">ksp.jaminan</field>
+        <field name="arch" type="xml">
+            <tree string="Administrasi Jaminan">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="model"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ksp_jaminan_action_window" model="ir.actions.act_window">
+        <field name="name">Administrasi Jaminan</field>
+        <field name="res_model">ksp.jaminan</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Jaminan"
+              id = "ksp_jaminan_menu"
+              sequence = "40"
+              parent = "ksp_menu"/>
+
+    <menuitem name="Administrasi Jaminan"
+              id = "ksp_administrasi_jaminan_menu"
+              parent = "ksp_jaminan_menu"
+              action = "ksp_jaminan_action_window"/>
+
+    <record id="ksp_jaminan_merk_form_view" model="ir.ui.view">
+        <field name="name">ksp.jaminan.merk.form.view</field>
+        <field name="model">ksp.jaminan.merk</field>
+        <field name="arch" type="xml">
+            <form string="Merk Jaminan">
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <group>
+                        <field name="name"/>
+                        <field name="jenis"/>
+                    </group>
+                    <notebook>
+                        <page string="Model">
+                            <field name="model_line">
+                                <tree string="Model" create="false" editable="true">
+                                    <field name="name"/>
+                                    <field name="tahun"/>
+                                    <field name="harga_pasar"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ksp_jaminan_merk_tree_view" model="ir.ui.view">
+        <field name="name">ksp.jaminan.merk.tree.view</field>
+        <field name="model">ksp.jaminan.merk</field>
+        <field name="arch" type="xml">
+            <tree string="Merk Jaminan">
+                <field name="name"/>
+                <field name="jenis"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ksp_jaminan_merk_kanban_view" model="ir.ui.view">
+        <field name="name">ksp.jaminan.merk.kanban.view</field>
+        <field name="model">ksp.jaminan.merk</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="image"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('ksp.jaminan.merk','image_small',record.id.value)"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong><field name="name"/></strong><br/>
+                                <field name="jenis"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="ksp_jaminan_merk_action_window" model="ir.actions.act_window">
+        <field name="name">Merk Jaminan</field>
+        <field name="res_model">ksp.jaminan.merk</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+
+    <menuitem name="Jaminan"
+              id="ksp_jaminan_config_menu"
+              parent="ksp_config_menu"/>
+    <menuitem name="Merk"
+              id="ksp_jaminan_merk_config_menu"
+              parent = "ksp_jaminan_config_menu"
+              action = "ksp_jaminan_merk_action_window"/>
+
+    <record id="ksp_jaminan_model_form_view" model="ir.ui.view">
+        <field name="name">ksp.jaminan.model.form.view</field>
+        <field name="model">ksp.jaminan.model</field>
+        <field name="arch" type="xml">
+            <form string = "Model Jaminan">
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <group>
+                        <field name="merk"/>
+                        <field name="name"/>
+                        <field name="tahun"/>
+                        <field name="harga_pasar"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ksp_jaminan_model_tree_view" model="ir.ui.view">
+        <field name="name">ksp.jaminan.model.tree.view</field>
+        <field name="model">ksp.jaminan.model</field>
+        <field name="arch" type="xml">
+            <tree string="Model">
+                <field name="merk"/>
+                <field name="name"/>
+                <field name="tahun"/>
+                <field name="harga_pasar"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ksp_jaminan_model_kanban_view" model="ir.ui.view">
+        <field name="name">ksp.jaminan.model.kanban.view</field>
+        <field name="model">ksp.jaminan.model</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="merk"/>
+                <field name="name"/>
+                <field name="image"/>
+                <field name="tahun"/>
+                <field name="harga_pasar"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('ksp.jaminan.model','image_small',record.id.value)"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong><field name="merk"/></strong><br/>
+                                <strong><field name="name"/></strong><br/>
+                                Tahun:<field name="tahun"/><br/>
+                                Harga Pasar:<field name="harga_pasar"/><br/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="ksp_jaminan_model_action_window" model="ir.actions.act_window">
+        <field name="name">Model Jaminan</field>
+        <field name="res_model">ksp.jaminan.model</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+
+    <menuitem name="Model"
+              id="ksp_jaminan_model_config_menu"
+              parent = "ksp_jaminan_config_menu"
+              action="ksp_jaminan_model_action_window"/>
+  </data>
+</odoo>
